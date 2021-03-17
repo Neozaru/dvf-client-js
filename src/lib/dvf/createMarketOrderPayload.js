@@ -32,7 +32,7 @@ module.exports = async (dvf, orderData) => {
   const { value, error } = schema.validate(orderData)
   // TODO: handle error
 
-  const ethAddress = orderData.ethAddress || dvf.get('account')
+  const ethAddress = (orderData.ethAddress || dvf.get('account'))?.toLowerCase()
 
   const amountToSellBN = toBN(value.amountToSell)
   const baseSymbol = value.symbol.split(':')[0]

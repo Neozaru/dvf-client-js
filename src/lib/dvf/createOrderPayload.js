@@ -33,7 +33,7 @@ module.exports = async (dvf, orderData) => {
   // TODO: handle error
   // TODO: don't mutate
   value.feeRate = value.feeRate || dvf.config.DVF.defaultFeeRate
-  const ethAddress = orderData.ethAddress || dvf.get('account')
+  const ethAddress = (orderData.ethAddress || dvf.get('account'))?.toLowerCase()
 
   return {
     ...FP.pick(
