@@ -1,5 +1,4 @@
 const sw = require('starkware_crypto')
-const getTokenAddressFromTokenInfoOrThrow = require('../src/lib/dvf/token/getTokenAddressFromTokenInfoOrThrow')
 const { setup, register, deposit, withdraw, drip, testOrders, sleep } = require('./helpers')
 
 describe.skip('00 - Complete Path', () => {
@@ -37,8 +36,7 @@ describe.skip('00 - Complete Path', () => {
     const token = 'USDT'
 
     // get some tokens from the faucet
-    const tokenAddress = getTokenAddressFromTokenInfoOrThrow(dvf.config.tokenRegistry[token], 'ETHEREUM')
-    await drip(dvf, tokenAddress, address)
+    await drip(dvf, dvf.config.tokenRegistry[token].tokenAddress, address)
 
     await dvf.contract.approve(token)
     const tokenDepositResponse = await deposit(dvf, token, 100, privateKey)

@@ -5,7 +5,6 @@ const DVFError = require('../../dvf/DVFError')
 const BN = require('bignumber.js')
 const _ = require('lodash')
 const selectTransport = require('../../ledger/selectTransport')
-const getTokenAddressFromTokenInfoOrThrow = require('../../dvf/token/getTokenAddressFromTokenInfoOrThrow')
 
 module.exports = async (dvf, path, starkOrder) => {
   const Transport = selectTransport(dvf.isBrowser)
@@ -18,8 +17,8 @@ module.exports = async (dvf, path, starkOrder) => {
     starkTokenId: starkOrder.tokenSell
   })
 
-  const buyTokenInfo = dvf.token.getTokenInfoOrThrow(buySymbol)
-  const sellTokenInfo = dvf.token.getTokenInfoOrThrow(sellSymbol)
+  const buyCurrency = dvf.config.tokenRegistry[buySymbol]
+  const sellCurrency = dvf.config.tokenRegistry[sellSymbol]
 
   const transport = await Transport.create()
   const eth = new Eth(transport)
@@ -35,7 +34,8 @@ module.exports = async (dvf, path, starkOrder) => {
   // to be used for both buy as sell tokens and
   // for transfer method as well as well
 
-  let buyTokenAddress = getTokenAddressFromTokenInfoOrThrow(buyTokenInfo, 'ETHEREUM')
+  let buyTokenAddress = buyCurrency.tokenAddress
+
   if (buyTokenAddress) {
     const buyTokenInfo = byContractAddress(buyTokenAddress)
     buyTokenAddress = buyTokenAddress.substr(2)
@@ -61,7 +61,7 @@ module.exports = async (dvf, path, starkOrder) => {
   // to be used for both buy as sell tokens and
   // for transfer method as well as well
 
-  let sellTokenAddress = getTokenAddressFromTokenInfoOrThrow(sellTokenInfo, 'ETHEREUM')
+  let sellTokenAddress = sellCurrency.tokenAddress
   if (sellTokenAddress) {
     const sellTokenInfo = byContractAddress(sellTokenAddress)
     sellTokenAddress = sellTokenAddress.substr(2)
@@ -87,11 +87,11 @@ module.exports = async (dvf, path, starkOrder) => {
       starkPath,
       sellTokenAddress,
       sellSymbol === 'ETH' ? 'eth' : 'erc20',
-      new BN(sellTokenInfo.quantization),
+      new BN(sellCurrency.quantization),
       null,
       buyTokenAddress,
       buySymbol === 'ETH' ? 'eth' : 'erc20',
-      new BN(buyTokenInfo.quantization),
+      new BN(buyCurrency.quantization),
       null,
       starkOrder.vaultIdSell,
       starkOrder.vaultIdBuy,

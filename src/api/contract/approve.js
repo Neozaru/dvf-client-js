@@ -3,7 +3,6 @@
  *
  */
 const { BN, toBN } = require('dvf-utils')
-const getTokenAddressFromTokenInfoOrThrow = require('../../lib/dvf/token/getTokenAddressFromTokenInfoOrThrow')
 
 const maxAmountBN = BN(2).pow(96).minus(1)
 
@@ -22,7 +21,7 @@ const validateDepositAmountAndConvertToBN = amount => {
 
 const tokensWhichNeedResetToZero = ['USDT', 'OMG']
 
-module.exports = async (dvf, token, deposit, spender = dvf.config.DVF.starkExContractAddress, chain = 'ETHEREUM') => {
+module.exports = async (dvf, token, deposit, spender = dvf.config.DVF.starkExContractAddress) => {
   if (token === 'ETH') {
     // TODO: This code is not very safe if caller expects the result to be of
     // the shape returned by dvf.eth.send below.
@@ -33,7 +32,7 @@ module.exports = async (dvf, token, deposit, spender = dvf.config.DVF.starkExCon
     ? maxAmountBN
     : validateDepositAmountAndConvertToBN(deposit)
 
-  const allowance = await dvf.contract.isApproved(token, chain, spender)
+  const allowance = await dvf.contract.isApproved(token, spender)
 
   const allowanceBN = toBN(allowance)
 
@@ -43,11 +42,10 @@ module.exports = async (dvf, token, deposit, spender = dvf.config.DVF.starkExCon
   }
 
   const tokenInfo = dvf.token.getTokenInfoOrThrow(token)
-  const tokenAddress = getTokenAddressFromTokenInfoOrThrow(tokenInfo, chain)
 
   const approve = amount => dvf.eth.send(
     dvf.contract.abi.token,
-    tokenAddress,
+    tokenInfo.tokenAddress,
     'approve',
     [
       spender,
